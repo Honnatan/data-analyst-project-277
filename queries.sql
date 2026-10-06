@@ -96,3 +96,28 @@ join sellers s
 	on t.sales_person_id = s.employee_id
 order by income desc
 limit 10;
+
+-- Codigo para las personas que cuando compraron por primera vez habia promocion
+
+SELECT
+    -- s.customer_id,
+	concat(c.first_name, ' ', c.last_name ) as customer,
+    s.sale_date,
+    concat(e.first_name, ' ', e.last_name ) as seller
+    
+FROM (
+    SELECT
+        *,
+        ROW_NUMBER() OVER (
+            PARTITION BY customer_id
+            ORDER BY sale_date
+        ) AS rn
+    FROM sales
+) s
+JOIN products p 
+    ON s.product_id = p.product_id
+JOIN employees e  
+	ON s.sales_person_id  = e.employee_id
+JOIN customers c 
+	ON s.customer_id = c.customer_id 
+WHERE s.rn = 1 AND p.price = 0;
